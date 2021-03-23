@@ -63,7 +63,7 @@ namespace CompanyEmployees.API.Test
             //Arrange
             Company testCompany = SeedTestData.GetTestCompany();
             Guid testCompanyId = testCompany.Id;
-            mockRepo.Setup(r => r.Company.GetCompany(testCompanyId, It.IsAny<bool>())).Returns(testCompany);
+            mockRepo.Setup(repo => repo.Company.GetCompany(testCompanyId, It.IsAny<bool>())).Returns(testCompany);
             CompaniesController controller = new CompaniesController(mockRepo.Object,_mapper); //CompaniesController is sut(System Under Test)
 
             //Act
@@ -135,6 +135,9 @@ namespace CompanyEmployees.API.Test
             // Assert
             Assert.IsInstanceOf<NoContentResult>(result);
             mockRepo.Verify(repo => repo.Company.GetCompany(testDeleteCompany.Id, false), Times.Once);
+            mockRepo.Verify(repo => repo.Company.DeleteCompany(testDeleteCompany), Times.Once);
+            mockRepo.Verify(repo => repo.Save(), Times.Once);
+
         }
         [Test]
         public void DeleteCompany_ForUnExistingId_ReturnsNotFoundResult()
@@ -207,23 +210,6 @@ namespace CompanyEmployees.API.Test
             mockRepo.Verify(repo => repo.Company.GetCompany(companyToUpdate.Id, true), Times.Never);
             mockRepo.Verify(repo => repo.Save(), Times.Never);
         }
-        [Test]
-        public void UpdateCompany_UnExistingCompanyId_ReturnsNotFoundResult()
-        {
-            // Arrange 
-            Company companyToUpdate = SeedTestData.GetTestCompany();
 
-            CompanyForUpdateDto companyForUpdateDto = null;
-
-            var controller = new CompaniesController(mockRepo.Object, _mapper);
-            // Act
-            var result = controller.UpdateCompany(companyToUpdate.Id, companyForUpdateDto);
-
-            // Assert
-            Assert.IsInstanceOf<BadRequestObjectResult>(result);
-
-            mockRepo.Verify(repo => repo.Company.GetCompany(companyToUpdate.Id, true), Times.Never);
-            mockRepo.Verify(repo => repo.Save(), Times.Never);
-        }
     }
 }
